@@ -1,29 +1,18 @@
-# README #
+# What are droplets augmentation ?
+Droplets augmentation come from an idea of @VieVie31 and @Ricocotam for data augmentation. We both wanted a new funny way to get more data so we found this. Drop some transformations on your image (for now we only thought about images). We've seen as droping water droplet on an actual picture and seeing some zoom or distortion.
 
-This README would normally document whatever steps are necessary to get your application up and running.
+# How to use ?
+You simply follow the documentation for the parameters. Implemented dropelets use scipy.ndimage transformations so if you want more information on the actual transformation, you might look at scipy.ndimage documentation.
 
-### What is this repository for? ###
+# Examples
+TODO
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+# How to use with Keras ImageDataGenerator
+TODO
 
-### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+# TODO
+Review english
+Documentation of functions
+More droplets
+...
