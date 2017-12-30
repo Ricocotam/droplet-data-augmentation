@@ -32,6 +32,18 @@ def dropout(x, proportion, cval, *, proportion_generator=None):
     return x
 
 
+def windowed_transformation(x, window_size, transformation, channel_last=True, **transformation_kwargs):
+    temp = transformation(x, **transformation_kwargs)
+
+    indices = _get_random_indices(x.shape, window_size, channel_last)
+    if channel_last:
+        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
+    else:
+        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
+
+    return x
+
+
 def gaussian(x, sigma, window_size, mode="reflect", cval=0, channel_last=True):
     """Apply a gaussian filter over all the image but replaces only a random
         window.
@@ -53,56 +65,23 @@ def gaussian(x, sigma, window_size, mode="reflect", cval=0, channel_last=True):
         and then only a random selected window has been selected on the actual image
         from which we replaced pixels by the pixels of the filtered image over all channels.
     """
-    temp = transform.gaussian_filter(x, sigma, mode=mode, cval=cval)
-
-    indices = _get_random_indices(x.shape, window_size, channel_last)
-    if channel_last:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-    else:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-
-    return x
+    return windowed_transformation(x, window_size, transform.gaussian_filter, channel_last,
+                                   {sigma=sigma, mode=mode, cval=cval})
 
 
 def rotate(x, angle, axes, window_size, mode="reflect", cval=0, channel_last=True):
-    # Axes -> read scipy.ndimage.rotate doc
-
-    # Transformation
-    temp = transform.rotate(x, angle, axes, mode=mode, cval=cval)
-
-    indices = _get_random_indices(x.shape, window_size, channel_last)
-    if channel_last:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-    else:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-
-    return x
+    return windowed_transformation(x, window_size, transform.rotate, channel_last,
+                                   {axes=axes, mode=mode, cval=cval})
 
 
 def shift(x, shift, window_size, mode="reflect", cval=0, channel_last=True):
-    # shift -> read scipy.ndimage.shift doc
-    temp = transform.shift(x, shift, mode=mode, cval=cval)
-
-    indices = _get_random_indices(x.shape, window_size, channel_last)
-    if channel_last:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-    else:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-
-    return x
+    return windowed_transformation(x, window_size, transform.shift, channel_last,
+                                   {shift=shift, mode=mode, cval=cval})
 
 
 def zoom(x, zoom, window_size, mode="reflect", cval=0, channel_last=True):
-    # zoom -> read scipy.ndimage.zoom doc
-    temp = transform.rotate(x, zoom, mode=mode, cval=cval)
-
-    indices = _get_random_indices(x.shape, window_size, channel_last)
-    if channel_last:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-    else:
-        x[np.ix_(*indices)] = temp[np.ix_(*indices)]
-
-    return x
+    return windowed_transformation(x, window_size, transform.zoom, channel_last,
+                                   {zoom=zoom, mode=mode, cval=cval})
 
 
 def _get_random_indices(shape, window_size, channel_last):
