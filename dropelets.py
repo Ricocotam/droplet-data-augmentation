@@ -3,6 +3,22 @@ import scipy.ndimage as transform
 
 
 def dropout(x, proportion, cval, *, proportion_generator=None):
+    """Dropout pixels on an image. Drops are done on only one channel
+
+    Args:
+        x: The image from which dropouts are done. Modified.
+        proportion: percentage of the image to drop. Total pixels dropped is
+            `int(prop * np.prod(x.shape))`
+        cval: which value dropped pixels take
+        proportion_generator: Optionnal. Use a generator to get propotion
+            value. This is useful if you use ImageDataGenerator from Keras.
+
+    Returns:
+        The image with pixels dropped out. Image is modified, not copied
+
+    Notes:
+        Image given is modified, not copied.
+    """
     if proportion_generator:
         prop = next(proportion_generator)
     else:
@@ -17,13 +33,29 @@ def dropout(x, proportion, cval, *, proportion_generator=None):
 
 
 def gaussian(x, sigma, window_size, mode="reflect", cval=0, channel_last=True):
-    # Gaussian filter is done over all channels
-    # Replacement is also done over all channels
+    """Apply a gaussian filter over all the image but replaces only a random
+        window.
 
-    # Transformation
+    Args:
+        x: The image to transform, modified.
+        sigma: Sigma to use for gaussian filtering
+        window_size: Which window size you want to use to keep the transformation.
+            Might be an int are a tuple of length `len(x.shape)-1` as we don't
+            consider channels being spatial dimensions. Thus the droplet is applied
+            over all channels
+        mode: @see scipy.ndimage.gaussian_filter. Default is "reflect"
+        cval: @see scipy.ndimage.gaussian_filter. Default is 0
+        channel_last: True if you put channel dimension as last in x.shape.
+            True if RGB is shape (n, m, 3), False is it is (3, n, m).
+
+    Returns:
+        The image given as input modified. A gaussian filter has been applied on a copy
+        and then only a random selected window has been selected on the actual image
+        from which we replaced pixels by the pixels of the filtered image over all channels.
+    """
     temp = transform.gaussian_filter(x, sigma, mode=mode, cval=cval)
 
-    indices = get_random_indices(x.shape, window_size, channel_last)
+    indices = _get_random_indices(x.shape, window_size, channel_last)
     if channel_last:
         x[np.ix_(*indices)] = temp[np.ix_(*indices)]
     else:
@@ -38,7 +70,7 @@ def rotate(x, angle, axes, window_size, mode="reflect", cval=0, channel_last=Tru
     # Transformation
     temp = transform.rotate(x, angle, axes, mode=mode, cval=cval)
 
-    indices = get_random_indices(x.shape, window_size, channel_last)
+    indices = _get_random_indices(x.shape, window_size, channel_last)
     if channel_last:
         x[np.ix_(*indices)] = temp[np.ix_(*indices)]
     else:
@@ -51,7 +83,7 @@ def shift(x, shift, window_size, mode="reflect", cval=0, channel_last=True):
     # shift -> read scipy.ndimage.shift doc
     temp = transform.shift(x, shift, mode=mode, cval=cval)
 
-    indices = get_random_indices(x.shape, window_size, channel_last)
+    indices = _get_random_indices(x.shape, window_size, channel_last)
     if channel_last:
         x[np.ix_(*indices)] = temp[np.ix_(*indices)]
     else:
@@ -64,7 +96,7 @@ def zoom(x, zoom, window_size, mode="reflect", cval=0, channel_last=True):
     # zoom -> read scipy.ndimage.zoom doc
     temp = transform.rotate(x, zoom, mode=mode, cval=cval)
 
-    indices = get_random_indices(x.shape, window_size, channel_last)
+    indices = _get_random_indices(x.shape, window_size, channel_last)
     if channel_last:
         x[np.ix_(*indices)] = temp[np.ix_(*indices)]
     else:
@@ -73,7 +105,7 @@ def zoom(x, zoom, window_size, mode="reflect", cval=0, channel_last=True):
     return x
 
 
-def get_random_indices(shape, window_size, channel_last):
+def _get_random_indices(shape, window_size, channel_last):
     if type(window_size) is int:
         window_size = (window_size,) * (len(shape) - 1)
 
