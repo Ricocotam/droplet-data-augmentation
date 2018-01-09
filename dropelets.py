@@ -66,22 +66,22 @@ def gaussian(x, sigma, window_size, mode="reflect", cval=0, channel_last=True):
         from which we replaced pixels by the pixels of the filtered image over all channels.
     """
     return windowed_transformation(x, window_size, transform.gaussian_filter, channel_last,
-                                   {sigma=sigma, mode=mode, cval=cval})
+                                   sigma=sigma, mode=mode, cval=cval)
 
 
 def rotate(x, angle, axes, window_size, mode="reflect", cval=0, channel_last=True):
     return windowed_transformation(x, window_size, transform.rotate, channel_last,
-                                   {axes=axes, mode=mode, cval=cval})
+                                   angle=angle, axes=axes, mode=mode, cval=cval)
 
 
 def shift(x, shift, window_size, mode="reflect", cval=0, channel_last=True):
     return windowed_transformation(x, window_size, transform.shift, channel_last,
-                                   {shift=shift, mode=mode, cval=cval})
+                                   shift=shift, mode=mode, cval=cval)
 
 
 def zoom(x, zoom, window_size, mode="reflect", cval=0, channel_last=True):
     return windowed_transformation(x, window_size, transform.zoom, channel_last,
-                                   {zoom=zoom, mode=mode, cval=cval})
+                                   zoom=zoom, mode=mode, cval=cval)
 
 
 def _get_random_indices(shape, window_size, channel_last):
